@@ -1,0 +1,105 @@
+/* edit_item.css */
+
+/* 全体レイアウト */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f8f8f8;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* フォーム全体 */
+form {
+    background-color: #ffffff;
+    padding: 30px 40px;
+    margin: 40px 16px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 700px;
+    box-sizing: border-box;
+}
+
+/* タイトル */
+h1 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+/* ラベル */
+label {
+    display: block;
+    margin-top: 15px;
+    font-weight: bold;
+    color: #555;
+}
+
+/* 入力フィールド */
+input[type="text"],
+input[type="number"] {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    box-sizing: border-box;
+}
+
+/* 材料リスト */
+#ingredient-list {
+    margin-top: 20px;
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    padding: 15px;
+    border-radius: 6px;
+    background-color: #fafafa;
+}
+
+/* 材料フィールドの余白調整 */
+.ingredient-group {
+    margin-bottom: 16px;
+}
+
+/* ボタン */
+button {
+    margin-top: 20px;
+    padding: 12px 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+/* リンク */
+a {
+    display: inline-block;
+    margin-top: 20px;
+    margin-left: 15px;
+    text-decoration: none;
+    color: #007BFF;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* レスポンシブ対応 */
+@media screen and (max-width: 600px) {
+    form {
+        padding: 20px;
+    }
+}

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+	<link rel="stylesheet" type="text/css" th:href="@{/css/products.css}">
+  <meta charset="UTF-8">
+  <title>商品一覧</title>
+</head>
+<body>
+  <h2>登録済み商品一覧</h2>
+  	<div class="nav-buttons" style="text-align: center;">
+	<a href="/dashboard"><button type="button">ダッシュボードへ</button></a>
+    <a href="/registration"><button type="button">商品登録へ</button></a>
+    <a href="/ingredients"><button type="button">材料在庫画面へ</button></a>
+    <a href="/order"><button type="button">オーダー</button></a>
+  </div>
+  
+  <table>
+  <tr>
+    <th>商品名</th><th>価格</th><th>操作</th>
+  </tr>
+  <tr th:each="item : ${items}">
+    <td th:text="${item.name}"></td>
+    <td th:text="${item.price}"></td>
+    <td>
+     <form th:action="@{'/products/edit/' + ${item.itemId}}" method="get" style="display:inline;">
+  <button type="submit">編集</button>
+</form>
+      <form th:action="@{'/products/delete/' + ${item.itemId}}" method="post" style="display:inline;">
+  <button type="submit" class="delete-button" onclick="return confirm('本当に削除しますか？')">削除</button>
+</form>
+
+    </td>
+  </tr>
+</table>
+
+</body>
+</html>

@@ -1,0 +1,179 @@
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f8f9fa;
+    padding: 40px;
+    color: #333;
+}
+
+h2 {
+    text-align: center;
+    color: #2c3e50;
+    margin-bottom: 30px;
+}
+
+form {
+    width: 60%;
+    margin: 0 auto;
+    background-color: #fff;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+label {
+    display: inline-block;
+    width: 100px;
+    margin-top: 10px;
+}
+
+input[type="text"],
+input[type="number"] {
+    width: 200px;
+    padding: 5px;
+    margin-bottom: 10px;
+}
+
+.ingredient-row {
+    margin-bottom: 10px;
+}
+
+button {
+    margin-top: 15px;
+    padding: 10px 15px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #2980b9;
+}
+
+.remove-button {
+    margin-left: 10px;
+    padding: 3px 8px;
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.remove-button:hover {
+    background-color: #c0392b;
+}
+
+form label {
+  display: inline-block;
+  width: 60px; /* ラベルの横幅を狭める */
+  margin-right: 5px; /* ラベルと入力欄の間隔を少しだけ空ける */
+}
+
+form input[type="text"],
+form input[type="number"] {
+  width: 200px;
+  padding: 5px;
+  margin-bottom: 10px;
+}
+/* 使用量と単位の入力欄の幅を狭める */
+.ingredient-row input[name$=".quantity"],
+.ingredient-row input[name$=".unit"] {
+  width: 80px; /* またはお好みで 60px や 100px に調整可 */
+}
+
+/* 材料名は少し広めに */
+.ingredient-row input[name$=".name"] {
+  width: 180px;
+}
+
+/* ラベルと入力の間の余白を狭める */
+.ingredient-row label {
+  margin-right: 10px;
+}
+
+/* 行全体に少し間隔をつける（任意） */
+.ingredient-row {
+  margin-bottom: 8px;
+}
+
+.ingredient-row {
+  display: flex;
+  align-items: center; /* ラベルと入力欄を縦中央に揃える */
+  gap: 8px; /* 各項目の横の間隔を調整 */
+  margin-bottom: 8px;
+}
+
+/* 材料名、使用量、単位の入力欄サイズ調整 */
+.ingredient-row input[name$=".name"] {
+  width: 160px;
+}
+
+.ingredient-row input[name$=".quantity"],
+.ingredient-row input[name$=".unit"] {
+  width: 80px;
+}
+
+/* ラベルの間隔調整 */
+.ingredient-row label {
+  margin-right: 4px;
+  margin-bottom: 0;
+  font-size: 14px;
+}
+
+/* 数値入力がマイナスにならないようにする */
+input[type="number"] {
+  min: 0;
+}
+
+/* 登録ボタンなど */
+button {
+  margin-top: 15px;
+  padding: 10px 15px;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #2980b9;
+}
+.nav-buttons {
+  text-align: center;
+  margin-bottom: 20px;
+}
+.error {
+    color: red;
+    font-size: 0.9em;
+}
+
+.error-tooltip {
+  position: relative;
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+  padding: 6px 12px;
+  border-radius: 6px;
+  margin-top: 4px;
+  font-size: 0.9em;
+  max-width: 280px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+/* 吹き出しの三角形 */
+.error-tooltip::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: -10px;
+  transform: translateY(-50%);
+  border-width: 6px;
+  border-style: solid;
+  border-color: transparent #f8d7da transparent transparent;
+}
+
+

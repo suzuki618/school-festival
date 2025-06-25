@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <link rel="stylesheet" type="text/css" th:href="@{/css/ingredients.css}">
+  <title>材料在庫一覧</title>
+  <meta charset="UTF-8">
+</head>
+<body>
+  <h1>材料在庫一覧</h1>
+
+  <div class="nav-buttons" style="text-align: center;">
+    <a href="/dashboard"><button type="button">ダッシュボードへ</button></a>
+    <a href="/registration"><button type="button">商品登録へ</button></a>
+    <a href="/products"><button type="button">商品一覧へ</button></a>
+    <a href="/order"><button type="button">オーダー</button></a>
+  </div>
+
+  <table border="1">
+    <thead>
+      <tr>
+        <th>材料名</th>
+        <th>現在の在庫量</th>
+        <th>追加する在庫量</th>
+        <th>単位</th>
+        <th>操作</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr th:each="ingredient : ${ingredients}">
+        <form th:action="@{'/ingredients/update/' + ${ingredient.ingredientId}}" method="post">
+          <td th:text="${ingredient.name}"></td>
+          <td th:text="${ingredient.stock}"></td>
+          <td>
+            <input type="number" name="stock" min="0" required placeholder="追加量">
+          </td>
+          <td th:text="${ingredient.unit}"></td>
+          <td>
+            <button type="submit">追加</button>
+          </td>
+        </form>
+      </tr>
+    </tbody>
+  </table>
+</body>
+</html>

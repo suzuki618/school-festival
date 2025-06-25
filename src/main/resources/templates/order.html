@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>注文一覧</title>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/order.css}">
+</head>
+<body>
+<h2>注文可能な商品一覧</h2>
+
+<div style="text-align: center;">
+    <a href="/products"><button type="button">商品一覧へ</button></a>
+    <a href="/dashboard"><button type="button">ダッシュボードへ</button></a>
+</div>
+
+<form id="orderForm" action="/order/submit" method="post">
+  <table>
+      <tr>
+          <th>商品名</th>
+          <th>価格</th>
+          <th>数量</th>
+      </tr>
+      <tr th:each="item, iterStat : ${items}">
+          <td th:text="${item.name}"></td>
+          <td th:text="${item.price} + '円'"></td>
+          <td>
+              <input type="hidden" name="itemIds" th:value="${item.itemId}" />
+              <input type="number" name="quantities" min="0" value="0" style="width: 60px;">
+          </td>
+      </tr>
+  </table>
+
+  <!-- 自動生成される customerId をここにセット -->
+  <input type="hidden" name="customerId" id="customerId">
+
+  <div style="text-align: center; margin-top: 20px;">
+      <button type="submit">まとめて注文する</button>
+  </div>
+</form>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('orderForm');
+    const customerIdInput = document.getElementById('customerId');
+
+    form.addEventListener('submit', (e) => {
+      // 現在のカウントを取得
+      let customerCount = parseInt(localStorage.getItem('customerCount') || '0', 10);
+      customerCount++;
+      localStorage.setItem('customerCount', customerCount);
+
+      // IDを生成してフォームに設定
+      const newCustomerId = 'お客様' + customerCount;
+      customerIdInput.value = newCustomerId;
+    });
+  });
+</script>
+
+</body>
+</html>

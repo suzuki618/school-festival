@@ -1,0 +1,1 @@
+typeSearchIndex = [{"p":"com.example.demo.controller","l":"RegistrationController"},{"l":"すべてのクラスおよびインタフェース","u":"allclasses-index.html"}];updateSearchResults();

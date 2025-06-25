@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>商品登録フォーム</title>
+  <link rel="stylesheet" type="text/css" th:href="@{/css/registration.css}">
+  <script defer th:src="@{/js/registration.js}"></script>
+</head>
+
+<body>
+  <h2>商品登録フォーム</h2>
+    <div class="nav-buttons" style="text-align: center;">
+	<a href="/dashboard"><button type="button">ダッシュボードへ</button></a>
+    <a href="/products"><button type="button">商品一覧へ</button></a>
+    <a href="/ingredients"><button type="button">材料在庫画面へ</button></a>
+    <a href="/order"><button type="button">オーダー</button></a>
+  </div>
+  <form id="product-form" th:action="@{/register}" method="post" th:object="${productForm}">
+  
+  <!-- 商品名 -->
+<label>商品名:</label>
+<input type="text" th:field="*{name}" required />
+<br><br>
+
+
+ <label for="price">価格:</label>
+<input type="number" id="price" th:field="*{price}" min="0" required />
+<div th:if="${#fields.hasErrors('price')}" th:errors="*{price}"></div>
+  <br><br>
+
+ <!-- 材料 -->
+<div id="ingredients-container">
+  <div class="ingredient-row" th:each="ingredient, iStat : *{ingredients}">
+    <label>材料名:</label>
+    <input type="text" required th:field="*{ingredients[__${iStat.index}__].name}" />
+    <div th:errors="*{ingredients[__${iStat.index}__].name}"></div>
+
+ <label>使用量:</label>
+<input type="number" step="0.1" min="0.1" required th:field="*{ingredients[__${iStat.index}__].quantity}" />
+
+    <label>単位:</label>
+    <input type="text" required placeholder="例：g, ml, 個" th:field="*{ingredients[__${iStat.index}__].unit}" />
+    <div th:errors="*{ingredients[__${iStat.index}__].unit}"></div>
+  </div>
+</div>
+
+    <button type="button" id="add-button">材料を追加</button><br><br>
+    <button type="submit">商品を登録</button>
+  </form>
+</body>
+</html>

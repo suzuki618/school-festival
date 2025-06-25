@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>商品編集</title>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/edit_item.css}">
+    <script>
+        function addIngredient() {
+            const list = document.getElementById('ingredient-list');
+            const index = list.children.length;
+            const div = document.createElement('div');
+            div.innerHTML = `
+                <label>材料名:</label>
+                <input type="text" name="ingredients[${index}].name" /><br/>
+
+                <label>単位:</label>
+                <input type="text" name="ingredients[${index}].unit" /><br/>
+
+                <label>使用量:</label>
+                <input type="number" step="0.1" name="ingredients[${index}].quantity" /><br/>
+
+                <button type="button" onclick="removeIngredient(this)">削除</button>
+                <hr/>
+            `;
+            list.appendChild(div);
+        }
+
+        function removeIngredient(button) {
+            const div = button.parentElement;
+            div.remove();
+        }
+    </script>
+</head>
+<body>
+    <form th:action="@{|/products/edit/${productForm.itemId}|}" method="post" th:object="${productForm}">
+        <h1>商品編集</h1>
+
+        <!-- 全体エラーメッセージ表示 -->
+        <div th:if="${#fields.hasErrors()}">
+            <p style="color: red;">入力内容に誤りがあります。確認してください。</p>
+        </div>
+
+        <input type="hidden" th:field="*{itemId}" />
+
+        <label>商品名:</label>
+        <input type="text" th:field="*{name}" /><br/>
+        <span th:if="${#fields.hasErrors('name')}" th:errors="*{name}" style="color:red"></span>
+
+        <label>価格:</label>
+        <input type="number" th:field="*{price}" /><br/>
+        <span th:if="${#fields.hasErrors('price')}" th:errors="*{price}" style="color:red"></span>
+
+        <h2>材料一覧</h2>
+        <div id="ingredient-list">
+            <div th:each="ingredient, iStat : *{ingredients}">
+                <label>材料名:</label>
+                <input type="text" th:name="|ingredients[${iStat.index}].name|" th:value="${ingredient.name}" /><br/>
+                <span th:if="${#fields.hasErrors('ingredients[' + iStat.index + '].name')}"
+                      th:errors="*{ingredients[__${iStat.index}__].name}" style="color:red"></span>
+
+                <label>単位:</label>
+                <input type="text" th:name="|ingredients[${iStat.index}].unit|" th:value="${ingredient.unit}" /><br/>
+                <span th:if="${#fields.hasErrors('ingredients[' + iStat.index + '].unit')}"
+                      th:errors="*{ingredients[__${iStat.index}__].unit}" style="color:red"></span>
+
+                <label>数量:</label>
+                <input type="number" step="0.1" th:name="|ingredients[${iStat.index}].quantity|" th:value="${ingredient.quantity}" /><br/>
+                <span th:if="${#fields.hasErrors('ingredients[' + iStat.index + '].quantity')}"
+                      th:errors="*{ingredients[__${iStat.index}__].quantity}" style="color:red"></span>
+
+                <button type="button" onclick="removeIngredient(this)">削除</button>
+                <hr/>
+            </div>
+        </div>
+
+        <button type="button" onclick="addIngredient()">＋ 材料を追加</button><br/><br/>
+        <button type="submit">保存</button>
+        <a th:href="@{/products}">戻る</a>
+    </form>
+</body>
+</html>
