@@ -35,6 +35,13 @@ public class RegistrationController {
 
     @Autowired
     private RecipeRepository recipeRepo;
+    
+    
+    @GetMapping("/")
+    public String index() {
+        return "redirect:/products"; // 初期ページを商品一覧にリダイレクトするなど
+    }
+
 
     @GetMapping("/registration")
     public String showRegistrationForm(Model model) {
