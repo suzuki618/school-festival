@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.demo.entity.Ingredient;
 import com.example.demo.entity.Item;
@@ -24,7 +25,6 @@ import com.example.demo.repository.RecipeRepository;
 import com.example.demo.repository.SalesRecordRepository;
 
 import jakarta.validation.Valid;
-
 @Controller
 public class RegistrationController {
 
@@ -169,10 +169,13 @@ public class RegistrationController {
 
     @PostMapping("/products/delete/{itemId}")
     @Transactional
-    public String deleteItem(@PathVariable String itemId, Model model) {
+    public String deleteItem(
+        @PathVariable String itemId,
+        RedirectAttributes redirectAttributes
+    ) {
         boolean hasSales = salesRecordRepo.existsByItemId(itemId);
         if (hasSales) {
-            model.addAttribute("error", "この商品は販売記録があるため削除できません。");
+            redirectAttributes.addFlashAttribute("error", "この商品は販売記録があるため削除できません。");
             return "redirect:/products";
         }
         recipeRepo.deleteByItemId(itemId);
