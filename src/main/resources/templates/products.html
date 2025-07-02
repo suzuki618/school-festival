@@ -7,6 +7,10 @@
 </head>
 <body>
   <h2>登録済み商品一覧</h2>
+  <div th:if="${error}" style="color: red; text-align: center;">
+  <p th:text="${error}"></p>
+</div>
+
   	<div class="nav-buttons" style="text-align: center;">
 	<a href="/dashboard"><button type="button">ダッシュボードへ</button></a>
     <a href="/registration"><button type="button">商品登録へ</button></a>

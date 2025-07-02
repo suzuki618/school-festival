@@ -21,6 +21,7 @@ import com.example.demo.form.ProductForm;
 import com.example.demo.repository.IngredientRepository;
 import com.example.demo.repository.ItemRepository;
 import com.example.demo.repository.RecipeRepository;
+import com.example.demo.repository.SalesRecordRepository;
 
 import jakarta.validation.Valid;
 
@@ -35,6 +36,9 @@ public class RegistrationController {
 
     @Autowired
     private RecipeRepository recipeRepo;
+    
+    @Autowired
+    private SalesRecordRepository salesRecordRepo;
     
     
     @GetMapping("/")
@@ -165,9 +169,15 @@ public class RegistrationController {
 
     @PostMapping("/products/delete/{itemId}")
     @Transactional
-    public String deleteItem(@PathVariable String itemId) {
+    public String deleteItem(@PathVariable String itemId, Model model) {
+        boolean hasSales = salesRecordRepo.existsByItemId(itemId);
+        if (hasSales) {
+            model.addAttribute("error", "この商品は販売記録があるため削除できません。");
+            return "redirect:/products";
+        }
         recipeRepo.deleteByItemId(itemId);
         itemRepo.deleteById(itemId);
         return "redirect:/products";
     }
+
 }
