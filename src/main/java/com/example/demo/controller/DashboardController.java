@@ -1,7 +1,9 @@
 package com.example.demo.controller;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -28,10 +30,24 @@ public class DashboardController {
 
     @GetMapping("/dashboard")
     public String showDashboard(Model model, HttpSession session) {
-        LocalDate endDate = LocalDate.now();
-        LocalDate startDate = endDate.minusDays(14);
+        LocalDate today = LocalDate.now();
 
-        List<SalesRecord> salesRecords = salesRecordRepository.findByDateBetween(startDate, endDate);
+        // 最古日付を取得
+        LocalDate firstDate = salesRecordRepository.findAll().stream()
+                .map(SalesRecord::getDate)
+                .min(LocalDate::compareTo)
+                .orElse(today);
+
+        // フォーマットを yyyy/MM/dd に変換
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+        String formattedStartDate = firstDate.format(formatter);
+        String formattedToday = today.format(formatter);
+
+        // 売上期間の文字列
+        String salesPeriod = formattedStartDate + " ～ " + formattedToday;
+
+        // 期間の売上データを取得
+        List<SalesRecord> salesRecords = salesRecordRepository.findByDateBetween(firstDate, today);
 
         int totalSales = salesRecords.stream()
                 .mapToInt(SalesRecord::getTotalPrice)
@@ -51,7 +67,7 @@ public class DashboardController {
         Map<String, List<OrderItem>> customerOrders = (Map<String, List<OrderItem>>) session.getAttribute("customerOrders");
 
         model.addAttribute("totalSales", totalSales);
-        model.addAttribute("salesPeriod", startDate + " ～ " + endDate);
+        model.addAttribute("salesPeriod", salesPeriod);
         model.addAttribute("dailySales", dailySales);
         model.addAttribute("customerOrders", customerOrders);
 
@@ -69,7 +85,7 @@ public class DashboardController {
     }
 
     /**
-     * 期間指定で売上をリセット（オプション）
+     * 期間指定で売上をリセット
      */
     @PostMapping("/dashboard/reset-sales-range")
     @ResponseBody
@@ -79,6 +95,71 @@ public class DashboardController {
         List<SalesRecord> recordsToDelete = salesRecordRepository.findByDateBetween(startDate, endDate);
         salesRecordRepository.deleteAll(recordsToDelete);
         return "指定期間の売上をリセットしました";
+    }
+
+    /**
+     * お客様番号をリセット
+     */
+    @PostMapping("/dashboard/reset-customers")
+    @ResponseBody
+    public String resetCustomers(HttpSession session) {
+        // 顧客注文情報をクリア
+        session.removeAttribute("customerOrders");
+
+        // お客様番号カウンタもリセット（OrderControllerと統一）
+        session.setAttribute("customerCounter", 0);
+
+        return "お客様番号をリセットしました";
+    }
+
+    /**
+     * 顧客注文から特定の商品を削除し、売上情報も更新
+     */
+    @PostMapping("/order/delete-item")
+    public String deleteOrderItem(@RequestParam String customerId,
+                                  @RequestParam String itemName,
+                                  HttpSession session) {
+
+        Map<String, List<OrderItem>> customerOrders =
+                (Map<String, List<OrderItem>>) session.getAttribute("customerOrders");
+
+        if (customerOrders != null && customerOrders.containsKey(customerId)) {
+            List<OrderItem> items = customerOrders.get(customerId);
+            Iterator<OrderItem> iterator = items.iterator();
+
+            while (iterator.hasNext()) {
+                OrderItem item = iterator.next();
+                if (item.getItemName().equals(itemName)) {
+                    // 削除対象商品の合計金額を取得
+                    int itemTotalPrice = item.getPrice();
+
+                    iterator.remove();
+
+                    // 売上情報の更新
+                    LocalDate todayDate = LocalDate.now();
+                    List<SalesRecord> records = salesRecordRepository.findByDateBetween(todayDate, todayDate);
+
+                    if (!records.isEmpty()) {
+                        SalesRecord record = records.get(0);
+                        int updatedPrice = record.getTotalPrice() - itemTotalPrice;
+                        record.setTotalPrice(Math.max(updatedPrice, 0)); // 0未満は防止
+                        salesRecordRepository.save(record);
+                    }
+
+                    break; // 1件削除したらループ抜け
+                }
+            }
+
+            // 顧客の注文リストが空なら顧客自体も削除
+            if (items.isEmpty()) {
+                customerOrders.remove(customerId);
+            } else {
+                customerOrders.put(customerId, items);
+            }
+            session.setAttribute("customerOrders", customerOrders);
+        }
+
+        return "redirect:/dashboard";
     }
 
     /**

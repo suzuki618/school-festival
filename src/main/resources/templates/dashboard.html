@@ -76,8 +76,7 @@
       padding: 10px;
       border-radius: 8px;
       margin-bottom: 20px;
-      cursor: pointer;
-      transition: border-color 0.2s, background-color 0.2s;
+      transition: background-color 0.2s;
     }
     .customer-block:hover {
       background-color: #f0f8ff;
@@ -86,7 +85,7 @@
       border-color: #3498db;
       background-color: #d0eaff;
     }
-    #deleteSelected, #resetSalesBtn, #resetRangeBtn {
+    #deleteSelected, #resetSalesBtn, #resetCustomerNumbersBtn {
       background-color: #e74c3c;
       color: white;
       border: none;
@@ -98,120 +97,125 @@
       box-shadow: 0 3px 6px rgba(0,0,0,0.15);
       transition: background-color 0.2s;
     }
-    #deleteSelected:hover, #resetSalesBtn:hover, #resetRangeBtn:hover {
+    #deleteSelected:hover, #resetSalesBtn:hover, #resetCustomerNumbersBtn:hover {
       background-color: #c0392b;
     }
-    .range-form input {
-      margin: 5px;
+    .flash-message {
+      background-color: #dff0d8;
+      color: #3c763d;
+      padding: 15px;
+      margin-bottom: 20px;
+      border: 1px solid #d6e9c6;
+      border-radius: 6px;
     }
   </style>
 </head>
 <body>
 <header>
-  <h1>ダッシュボード</h1>
-</header>
-<div class="container">
-  <div class="nav-buttons">
-    <a href="/registration">商品登録</a>
-    <a href="/products">商品一覧</a>
-    <a href="/ingredients">材料在庫</a>
-    <a href="/order">オーダー</a>
-  </div>
+	<h1>ダッシュボード</h1>
+	</header>
+	<div class="container">
 
-  <div class="card">
-    <h2>概要</h2>
-    <p>現在の全顧客の注文一覧です。</p>
-    <div th:if="${customerOrders != null}">
-      <div th:each="entry : ${customerOrders}"
-           class="customer-block"
-           th:attr="data-customer=${entry.key}">
-        <h4 th:text="'【お客様】' + ${entry.key}"></h4>
-        <ul>
-          <li th:each="item : ${entry.value}">
-            <span th:text="${item.itemName}">商品名</span>：<span th:text="${item.quantity}">0</span> 個
-          </li>
-        </ul>
-      </div>
-    </div>
-    <button id="deleteSelected">選択したお客様の注文を削除</button>
-  </div>
+	  <!-- ✅ フラッシュメッセージ表示 -->
+	  <div th:if="${message}" class="flash-message">
+	    <p th:text="${message}"></p>
+	  </div>
 
-  <div class="card">
-    <h2>売上情報</h2>
-    <div class="sales-summary">
-      売上合計: <span th:text="${totalSales}">123,000</span> 円<br>
-      期間: <span th:text="${salesPeriod}">2025/05/01 - 2025/05/14</span>
-    </div>
-    <table class="sales-table">
-      <thead>
-        <tr><th>日付</th><th>売上金額</th></tr>
-      </thead>
-      <tbody>
-        <tr th:each="record : ${dailySales}">
-          <td th:text="${record.date}">2025/05/13</td>
-          <td th:text="${record.amount}">12,000</td>
-        </tr>
-      </tbody>
-    </table>
+	  <div class="nav-buttons">
+	    <a href="/registration">商品登録</a>
+	    <a href="/products">商品一覧</a>
+	    <a href="/ingredients">材料在庫</a>
+	    <a href="/order">オーダー</a>
+	  </div>
 
-    <button id="resetSalesBtn">売上を全てリセット</button>
-    <form id="resetRangeForm" class="range-form">
-      <input type="date" name="start">
-      <input type="date" name="end">
-      <button type="submit" id="resetRangeBtn">期間でリセット</button>
-    </form>
-  </div>
-</div>
+	  <div class="card">
+	    <h2>概要</h2>
+	    <p>現在の全顧客の注文一覧です。</p>
+	    <div th:if="${customerOrders != null}">
+	      <div th:each="entry : ${customerOrders}"
+	           class="customer-block"
+	           th:attr="data-customer=${entry.key}">
+	        <h4 th:text="'【お客様】' + ${entry.key}"></h4>
+	        <ul>
+	          <li th:each="item : ${entry.value}">
+	            <span th:text="${item.itemName}">商品名</span>：
+	            <span th:text="${item.quantity}">0</span> 個
+	          </li>
+	        </ul>
+	      </div>
+	    </div>
+	    <button id="deleteSelected">選択したお客様の注文を削除</button>
+	  </div>
 
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const STORAGE_KEY = 'deletedCustomers';
-    const getDeletedCustomers = () => JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-    const saveDeletedCustomers = (list) => localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+	  <div class="card">
+	    <h2>売上情報</h2>
+	    <div class="sales-summary">
+	      売上合計: <span th:text="${totalSales}">123,000</span> 円<br>
+	      期間: <span th:text="${salesPeriod}">2025/05/01 - 2025/05/14</span>
+	    </div>
+	    <table class="sales-table">
+	      <thead>
+	        <tr><th>日付</th><th>売上金額</th></tr>
+	      </thead>
+	      <tbody>
+	        <tr th:each="record : ${dailySales}">
+	          <td th:text="${record.date}">2025/05/13</td>
+	          <td th:text="${record.amount}">12,000</td>
+	        </tr>
+	      </tbody>
+	    </table>
 
-    const deletedList = getDeletedCustomers();
-    deletedList.forEach(name => {
-      const block = document.querySelector(`.customer-block[data-customer="${name}"]`);
-      if (block) block.remove();
-    });
+	    <button id="resetSalesBtn">売上を全てリセット</button>
+	    <button id="resetCustomerNumbersBtn">お客様番号をリセット</button>
+	  </div>
+	</div>
 
-    document.querySelectorAll('.customer-block').forEach(block => {
-      block.addEventListener('click', () => {
-        block.classList.toggle('selected');
-      });
-    });
+	<script>
+	  document.addEventListener('DOMContentLoaded', () => {
+	    const STORAGE_KEY = 'deletedCustomers';
+	    const getDeletedCustomers = () => JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+	    const saveDeletedCustomers = (list) => localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
 
-    document.getElementById('deleteSelected').addEventListener('click', () => {
-      let deleted = getDeletedCustomers();
-      document.querySelectorAll('.customer-block.selected').forEach(block => {
-        const name = block.getAttribute('data-customer');
-        if (name && !deleted.includes(name)) deleted.push(name);
-        block.remove();
-      });
-      saveDeletedCustomers(deleted);
-    });
+	    const deletedList = getDeletedCustomers();
+	    deletedList.forEach(name => {
+	      const block = document.querySelector(`.customer-block[data-customer="${name}"]`);
+	      if (block) block.remove();
+	    });
 
-    document.getElementById('resetSalesBtn').addEventListener('click', () => {
-      if (confirm("売上をすべてリセットしますか？")) {
-        fetch('/dashboard/reset-sales', { method: 'POST' })
-          .then(res => res.ok ? location.reload() : alert("リセット失敗"));
-      }
-    });
+	    document.querySelectorAll('.customer-block').forEach(block => {
+	      block.addEventListener('click', () => {
+	        block.classList.toggle('selected');
+	      });
+	    });
 
-    document.getElementById('resetRangeForm').addEventListener('submit', (e) => {
-      e.preventDefault();
-      const start = e.target.start.value;
-      const end = e.target.end.value;
-      if (!start || !end) return alert("日付を入力してください");
-      if (confirm(`売上を ${start} 〜 ${end} の期間でリセットしますか？`)) {
-        fetch('/dashboard/reset-sales-range', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ start, end })
-        }).then(res => res.ok ? location.reload() : alert("期間リセット失敗"));
-      }
-    });
-  });
-</script>
-</body>
-</html>
+	    document.getElementById('deleteSelected').addEventListener('click', () => {
+	      const deleted = getDeletedCustomers();
+	      document.querySelectorAll('.customer-block.selected').forEach(block => {
+	        const name = block.getAttribute('data-customer');
+	        if (name && !deleted.includes(name)) deleted.push(name);
+	        block.remove();
+	      });
+	      saveDeletedCustomers(deleted);
+	    });
+
+	    document.getElementById('resetSalesBtn').addEventListener('click', () => {
+	      if (confirm("売上をすべてリセットしますか？")) {
+	        fetch('/dashboard/reset-sales', { method: 'POST' })
+	          .then(res => res.ok ? location.reload() : alert("リセット失敗"));
+	      }
+	    });
+
+		document.getElementById('resetCustomerNumbersBtn').addEventListener('click', () => {
+		  if (confirm("お客様番号をリセットしますか？")) {
+
+		    // ✅ localStorage もリセット
+		    localStorage.removeItem('deletedCustomers');
+
+		    fetch('/dashboard/reset-customers', { method: 'POST' })
+		      .then(res => res.ok ? location.reload() : alert("リセット失敗"));
+		  }
+		});
+	  });
+	</script>
+	</body>
+	</html>

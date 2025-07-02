@@ -5,22 +5,19 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.example.demo.entity.Ingredient;
 import com.example.demo.entity.Item;
 import com.example.demo.entity.OrderItem;
-import com.example.demo.entity.Recipe;
 import com.example.demo.entity.SalesRecord;
-import com.example.demo.repository.IngredientRepository;
 import com.example.demo.repository.ItemRepository;
-import com.example.demo.repository.RecipeRepository;
 import com.example.demo.repository.SalesRecordRepository;
 
 import jakarta.servlet.http.HttpSession;
@@ -34,13 +31,7 @@ public class OrderController {
     @Autowired
     private SalesRecordRepository salesRecordRepository;
 
-    
-    @Autowired
-    private RecipeRepository recipeRepository;
-
-    @Autowired
-    private IngredientRepository ingredientRepository;
-    // 注文ページを表示
+    // 注文ページ表示
     @GetMapping("/order")
     public String showOrderPage(Model model) {
         List<Item> allItems = itemRepository.findAll();
@@ -48,26 +39,23 @@ public class OrderController {
         return "order";
     }
 
-    // まとめて注文を処理
+    // 注文処理（customerIdを自動採番）
     @PostMapping("/order/submit")
-    public String submitOrder(@RequestParam List<String> itemIds,
-                              @RequestParam List<Integer> quantities,
-                              @RequestParam String customerId,
-                              HttpSession session) {
-
-        Map<String, List<OrderItem>> customerOrders = (Map<String, List<OrderItem>>) session.getAttribute("customerOrders");
-        if (customerOrders == null) {
-            customerOrders = new HashMap<>();
-        }
+    public String submitOrder(@org.springframework.web.bind.annotation.RequestParam List<String> itemIds,
+                              @org.springframework.web.bind.annotation.RequestParam List<Integer> quantities,
+                              HttpSession session,
+                              Model model,
+                              RedirectAttributes redirectAttributes) {
 
         List<OrderItem> orderList = new ArrayList<>();
 
         for (int i = 0; i < itemIds.size(); i++) {
             int quantity = quantities.get(i);
             if (quantity > 0) {
-                Item item = itemRepository.findById(itemIds.get(i)).orElse(null);
-                if (item != null) {
-                    orderList.add(new OrderItem(item.getName(), quantity));
+                Optional<Item> optionalItem = itemRepository.findById(itemIds.get(i));
+                if (optionalItem.isPresent()) {
+                    Item item = optionalItem.get();
+                    orderList.add(new OrderItem(item.getName(), quantity, item.getPrice()));
 
                     // 売上記録
                     SalesRecord record = new SalesRecord();
@@ -77,27 +65,50 @@ public class OrderController {
                     record.setTotalPrice(item.getPrice() * quantity);
                     record.setDate(LocalDate.now());
                     salesRecordRepository.save(record);
-
-                    // ▼ 材料を減らす処理
-                    List<Recipe> recipes = recipeRepository.findByItemId(item.getItemId());
-                    for (Recipe recipe : recipes) {
-                        Ingredient ingredient = ingredientRepository.findById(recipe.getIngredientId()).orElse(null);
-                        if (ingredient != null) {
-                            float usedAmount = recipe.getQuantity() * quantity;
-                            ingredient.setStock(ingredient.getStock() - usedAmount);
-                            ingredientRepository.save(ingredient);
-                        }
-                    }
                 }
             }
         }
 
-
-        if (!orderList.isEmpty()) {
-            customerOrders.put(customerId, orderList);
-            session.setAttribute("customerOrders", customerOrders);
+        // 商品が1つも選択されていない場合は注文ページに戻る
+        if (orderList.isEmpty()) {
+            model.addAttribute("error", "1つ以上の商品を選択してください。");
+            model.addAttribute("items", itemRepository.findAll());
+            return "order";
         }
 
+        // customerCounterからcustomerIdを生成
+        Integer customerCounter = (Integer) session.getAttribute("customerCounter");
+        if (customerCounter == null) {
+            customerCounter = 1;
+        } else {
+            customerCounter++;
+        }
+
+        String customerId = String.valueOf(customerCounter);
+
+        // セッションに保存
+        Map<String, List<OrderItem>> customerOrders =
+                (Map<String, List<OrderItem>>) session.getAttribute("customerOrders");
+
+        if (customerOrders == null) {
+            customerOrders = new HashMap<>();
+        }
+
+        customerOrders.put(customerId, orderList);
+        session.setAttribute("customerOrders", customerOrders);
+        session.setAttribute("customerCounter", customerCounter); // 更新
+
+        // フラッシュメッセージで完了通知
+        redirectAttributes.addFlashAttribute("message", "注文が完了しました。");
+
+        return "redirect:/dashboard";
+    }
+
+    // お客様番号リセット用
+    @PostMapping("/order/reset-customer-counter")
+    public String resetCustomerCounter(HttpSession session, RedirectAttributes redirectAttributes) {
+        session.setAttribute("customerCounter", 0);
+        redirectAttributes.addFlashAttribute("message", "お客様番号をリセットしました。");
         return "redirect:/dashboard";
     }
 }
