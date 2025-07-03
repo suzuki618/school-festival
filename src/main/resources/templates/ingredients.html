@@ -7,7 +7,10 @@
 </head>
 <body>
   <h1>材料在庫一覧</h1>
-
+ <!-- 材料削除エラーメッセージ表示 -->
+<div th:if="${deleteError}" style="color: red; text-align: center; margin-bottom: 10px;">
+    <p th:text="${deleteError}"></p>
+</div>
   <div class="nav-buttons" style="text-align: center;">
     <a href="/dashboard"><button type="button">ダッシュボードへ</button></a>
     <a href="/registration"><button type="button">商品登録へ</button></a>
@@ -22,24 +25,35 @@
         <th>現在の在庫量</th>
         <th>追加する在庫量</th>
         <th>単位</th>
-        <th>操作</th>
+        <th>追加</th>
+        <th>削除</th>
       </tr>
     </thead>
-    <tbody>
-      <tr th:each="ingredient : ${ingredients}">
-        <form th:action="@{'/ingredients/update/' + ${ingredient.ingredientId}}" method="post">
-          <td th:text="${ingredient.name}"></td>
-          <td th:text="${ingredient.stock}"></td>
-          <td>
-            <input type="number" name="stock" min="0" required placeholder="追加量">
-          </td>
-          <td th:text="${ingredient.unit}"></td>
-          <td>
-            <button type="submit">追加</button>
-          </td>
-        </form>
-      </tr>
-    </tbody>
+ <tbody>
+  <tr th:each="ingredient : ${ingredients}">
+    <form th:action="@{'/ingredients/update/' + ${ingredient.ingredientId}}" method="post">
+      <td th:text="${ingredient.name}"></td>
+      <td th:text="${ingredient.stock}"></td>
+      <td>
+        <input type="number" name="stock" min="0" required placeholder="追加量">
+      </td>
+      <td th:text="${ingredient.unit}"></td>
+      <td>
+        <button type="submit">追加</button>
+      </td>
+    </form>
+    <!-- ✅ 削除ボタン用フォーム -->
+    <td>
+      <form th:action="@{'/ingredients/delete/' + ${ingredient.ingredientId}}" method="post" 
+            th:onsubmit="return confirm('本当に削除しますか？');">
+        <button type="submit" style="background-color: red; color: white;">削除</button>
+      </form>
+    </td>
+  </tr>
+</tbody>
+
   </table>
 </body>
+
+
 </html>

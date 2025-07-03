@@ -10,4 +10,6 @@ public interface RecipeRepository extends JpaRepository<Recipe, Integer> {
     List<Recipe> findByItemId(String itemId);
 
 	void deleteByItemId(String itemId);
+	
+	List<Recipe> findByIngredientId(String ingredientId);
 }

@@ -10,15 +10,19 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.demo.entity.Ingredient;
 import com.example.demo.repository.IngredientRepository;
+import com.example.demo.repository.RecipeRepository;
 
 @Controller
 public class IngredientController {
 
     @Autowired
     private IngredientRepository ingredientRepository;
+    @Autowired
+    private RecipeRepository recipeRepository;
 
     @GetMapping("/ingredients")
     public String showIngredients(Model model) {
@@ -44,6 +48,17 @@ public class IngredientController {
     @PostMapping("/ingredients/add")
     public String addIngredient(@ModelAttribute Ingredient ingredient) {
         ingredientRepository.save(ingredient);
+        return "redirect:/ingredients";
+    }
+    @PostMapping("/ingredients/delete/{ingredientId}")
+    public String deleteIngredient(@PathVariable String ingredientId, Model model, RedirectAttributes redirectAttributes) {
+        if (!recipeRepository.findByIngredientId(ingredientId).isEmpty()) {
+            // 材料が使われている場合、リダイレクト時にエラーメッセージを渡す
+            redirectAttributes.addFlashAttribute("deleteError", "この材料はレシピで使用されているため削除できません。");
+            return "redirect:/ingredients";
+        }
+
+        ingredientRepository.deleteById(ingredientId);
         return "redirect:/ingredients";
     }
 }
